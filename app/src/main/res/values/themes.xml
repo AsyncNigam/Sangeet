@@ -6,4 +6,10 @@
     </style>
 
     <style name="Theme.Sangeet" parent="Base.Theme.Sangeet" />
+
+    <style name="circle_pic">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">60dp</item>
+
+    </style>
 </resources>

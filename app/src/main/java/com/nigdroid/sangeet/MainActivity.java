@@ -22,34 +22,30 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         String []arr={
-                "SAMJHO  NA  NASAMAJH",
-                "Chahun  Main Ya  Naa ",
-
-                "GULI MATA SONG ",
-                "Sun_Saathiya SONG",
-                "Samayama Song  Hi_Nanna__",
-                "Hasi Imran",
-                "Illahi_-_Yeh_Jawaani_Hai_Deewani",
+                "Samjho na Samajh__",
+                "Chahun  Main Ya Naa__ ",
+                "Guli mata___  ",
+                "Sun Saathiya___ ",
+                "Samayama Hi_Nanna__",
+                "Hasi Ban Gaye___",
+                "illahi_Mera Ji aye___",
                 "Jhol___",
-                "Jhoome Jo Pathaan ",
-                "Jo_Meri_Manzilon_Ko_Jati_Hai_",
-                "KAUN_TUJHE_",
-                "LO_MAAN_LIYA_HUM_Ne",
-                "Kasturi___Amar_Prem_Ki_Prem_Kahani",
-                "Na_Roja_Nuvve_-_Video_Song___Kushi_",
-                "Pal_Lyric_Video_-_Jalebi",
+                "Jhoome Jo Pathaan___ ",
+                "Dhadak Dhadak___",
+                "kaun tujhe___",
+                "Lo maan liya hum ne___",
+                "Kasturi___",
+                "Na_Roja_Nuvve__",
+                "Pal___",
                 "Paro__",
-                "Sanam_Teri_Kasam_movie_actress_and_actor_",
+                "Sanam_Teri_Kasam",
                 "Tofa_Chandini_re___",
-                "ଚିରିଙ୍ଗ_ଚିରିଙ୍ଗ___Chiring_Chiring_",
+                "Chiring_Chiring___",
                 "Megha_ru_tu_jharilu_Na..",
-                "ଲାଲ୍_ଟହ_ଟହ___Lal_Taha_Taha__",
+                "Lal_Taha_Taha__",
                 "Akhiyaan_Gulaab__",
-                "Dulhan_Banami__Sambalpuri_",
+                "dulhan banami___",
                 "Nigam_tune"
-
-
-
 
 
         };

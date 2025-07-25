@@ -19,12 +19,13 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.027">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imageView"
             android:layout_width="115dp"
             android:layout_height="115dp"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="20dp"
+            app:shapeAppearanceOverlay="@style/circle_pic"
 
             android:src="@drawable/images_nigu" />
 
@@ -33,10 +34,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="20dp"
+            android:layout_marginStart="16dp"
+
             android:fontFamily="@font/font_style"
             android:text="TextView"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
