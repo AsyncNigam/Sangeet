@@ -1,15 +1,25 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Sangeet" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<resources>
+    <style name="Base.Theme.Sangeet" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
     <style name="Theme.Sangeet" parent="Base.Theme.Sangeet" />
 
+    <style name="Theme.Sangeet.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_bg</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.Sangeet</item>
+    </style>
+
     <style name="circle_pic">
         <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">60dp</item>
+        <item name="cornerSize">28dp</item>
+    </style>
 
+    <style name="circle_art">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
 </resources>

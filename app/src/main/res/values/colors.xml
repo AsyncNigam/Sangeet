@@ -3,4 +3,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="purple">#3D8BC2</color>
+    <color name="splash_bg">#FF0B1020</color>
+    <color name="glass_text_primary">#F2FFFFFF</color>
+    <color name="glass_text_secondary">#B8C5D6</color>
+    <color name="accent_cyan">#54D6FF</color>
+    <color name="accent_magenta">#EC4899</color>
 </resources>

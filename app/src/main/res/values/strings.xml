@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Sangeet</string>
+    <string name="unknown_artist">Unknown artist</string>
+    <string name="library_title">Your library</string>
+    <string name="library_subtitle">Music on this device</string>
+    <string name="permission_rationale">Sangeet needs access to audio files on your device to list and play your music.</string>
+    <string name="grant_access">Grant access</string>
+    <string name="empty_library">No music was found on this device. Add audio files, grant access, then reopen the app.</string>
+    <string name="notification_channel_name">Playback</string>
+    <string name="notification_channel_desc">Now playing controls</string>
+    <string name="notification_playing">Preparing playback…</string>
+    <string name="action_play">Play</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_forward">Forward 15 seconds</string>
+    <string name="action_next">Next track</string>
+    <string name="background_playback_hint">Playback continues in the background with a foreground notification while you use other apps or turn the screen off.</string>
 </resources>
