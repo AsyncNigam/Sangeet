@@ -1,63 +1,145 @@
 package com.nigdroid.sangeet;
 
-
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.widget.ListView;
-import android.widget.Toolbar;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
+import com.nigdroid.sangeet.databinding.ActivityMainBinding;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    ListView listView;
+    private ActivityMainBinding binding;
+    private final List<Track> tracks = new ArrayList<>();
+    private TrackAdapter adapter;
+
+    private final ActivityResultLauncher<String[]> permissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), this::onPermissionResult);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        String []arr={
-                "Samjho na Samajh__",
-                "Chahun  Main Ya Naa__ ",
-                "Guli mata___  ",
-                "Sun Saathiya___ ",
-                "Samayama Hi_Nanna__",
-                "Hasi Ban Gaye___",
-                "illahi_Mera Ji aye___",
-                "Jhol___",
-                "Jhoome Jo Pathaan___ ",
-                "Dhadak Dhadak___",
-                "kaun tujhe___",
-                "Lo maan liya hum ne___",
-                "Kasturi___",
-                "Na_Roja_Nuvve__",
-                "Pal___",
-                "Paro__",
-                "Sanam_Teri_Kasam",
-                "Tofa_Chandini_re___",
-                "Chiring_Chiring___",
-                "Megha_ru_tu_jharilu_Na..",
-                "Lal_Taha_Taha__",
-                "Akhiyaan_Gulaab__",
-                "dulhan banami___",
-                "Nigam_tune"
+        adapter = new TrackAdapter(tracks, this::onTrackSelected);
+        binding.trackList.setLayoutManager(new LinearLayoutManager(this));
+        binding.trackList.setAdapter(adapter);
 
+        binding.btnGrantPermission.setOnClickListener(v -> requestAudioPermissions());
 
-        };
-
-//        toolbar=findViewById(R.id.toolbar);
-        listView=findViewById(R.id.listView);
-
-        Nigam ad=new Nigam(this,R.layout.my_nigam,arr);
-
-        listView.setAdapter(ad);
-
+        if (hasAudioAccess()) {
+            loadTracks();
+            showPermissionCard(false);
+        } else {
+            showPermissionCard(true);
+        }
     }
 
+    private void onPermissionResult(@NonNull Map<String, Boolean> result) {
+        boolean allGranted = true;
+        for (Boolean granted : result.values()) {
+            if (!Boolean.TRUE.equals(granted)) {
+                allGranted = false;
+                break;
+            }
+        }
+        showPermissionCard(!allGranted);
+        if (allGranted) {
+            loadTracks();
+        }
+    }
 
+    private boolean hasAudioAccess() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            boolean audio = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO)
+                    == PackageManager.PERMISSION_GRANTED;
+            boolean notif = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED;
+            return audio && notif;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED;
+        }
+        return true;
+    }
+
+    private void requestAudioPermissions() {
+        permissionLauncher.launch(getRequiredPermissions());
+    }
+
+    private String[] getRequiredPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return new String[]{
+                    Manifest.permission.READ_MEDIA_AUDIO,
+                    Manifest.permission.POST_NOTIFICATIONS
+            };
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
+        }
+        return new String[]{};
+    }
+
+    private void showPermissionCard(boolean visible) {
+        binding.permissionCard.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    private void loadTracks() {
+        tracks.clear();
+        tracks.addAll(MusicLibrary.loadLocalTracks(this));
+        adapter.notifyDataSetChanged();
+        boolean empty = tracks.isEmpty();
+        binding.emptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
+        binding.trackList.setVisibility(empty ? View.GONE : View.VISIBLE);
+    }
+
+    private void onTrackSelected(int position) {
+        if (!hasAudioAccess()) {
+            showPermissionCard(true);
+            return;
+        }
+        if (position < 0 || position >= tracks.size()) {
+            return;
+        }
+
+        Intent serviceIntent = new Intent(this, MusicService.class);
+        serviceIntent.setAction(MusicService.ACTION_PLAY_QUEUE);
+        serviceIntent.putExtra(MusicService.EXTRA_TRACKS, new ArrayList<>(tracks));
+        serviceIntent.putExtra(MusicService.EXTRA_INDEX, position);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
+
+        Intent player = new Intent(this, Song_player.class);
+        player.putExtra(Song_player.EXTRA_START_INDEX, position);
+        startActivity(player);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (hasAudioAccess()) {
+            loadTracks();
+            showPermissionCard(false);
+        }
+    }
 }
