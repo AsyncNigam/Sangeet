@@ -20,6 +20,7 @@ public final class MusicLibrary {
         String[] projection = new String[]{
                 MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.DISPLAY_NAME,
                 MediaStore.Audio.Media.ARTIST,
                 MediaStore.Audio.Media.DURATION,
                 MediaStore.Audio.Media.ALBUM_ID,
@@ -39,17 +40,29 @@ public final class MusicLibrary {
             }
             int idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
             int titleCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE);
+            int displayNameCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME);
             int artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST);
             int durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
             int albumIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID);
 
             while (cursor.moveToNext()) {
                 long id = cursor.getLong(idCol);
-                String title = cursor.getString(titleCol);
-                String artist = cursor.getString(artistCol);
+                String rawTitle = cursor.getString(titleCol);
+                String displayName = cursor.getString(displayNameCol);
+                String rawArtist = cursor.getString(artistCol);
                 long duration = durationCol >= 0 ? cursor.getLong(durationCol) : 0L;
                 long albumId = albumIdCol >= 0 ? cursor.getLong(albumIdCol) : 0L;
                 Uri trackUri = ContentUris.withAppendedId(collection, id);
+
+                String title = TrackTitleFormatter.formatTitle(rawTitle, displayName);
+                if (title.isEmpty()) {
+                    title = TrackTitleFormatter.formatTitle(displayName, rawTitle);
+                }
+                if (title.isEmpty()) {
+                    title = displayName != null ? displayName.replace('_', ' ').trim() : "Track";
+                }
+                String artist = TrackTitleFormatter.formatArtist(rawArtist);
+
                 tracks.add(new Track(id, title, artist, trackUri.toString(), duration, albumId));
             }
         }

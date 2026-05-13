@@ -44,4 +44,21 @@ public class Track implements Serializable {
     public long getAlbumId() {
         return albumId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Track)) {
+            return false;
+        }
+        Track track = (Track) o;
+        return id == track.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(id);
+    }
 }

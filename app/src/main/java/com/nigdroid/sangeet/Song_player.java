@@ -1,5 +1,7 @@
 package com.nigdroid.sangeet;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +9,8 @@ import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.view.View;
+import android.view.animation.PathInterpolator;
 import android.widget.SeekBar;
 
 import androidx.activity.EdgeToEdge;
@@ -24,6 +28,8 @@ public class Song_player extends AppCompatActivity implements PlaybackListener {
     private MusicService musicService;
     private boolean bound;
     private boolean userSeeking;
+    private ObjectAnimator albumFloatAnimator;
+    private ObjectAnimator panelFloatAnimator;
 
     private final ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -52,7 +58,7 @@ public class Song_player extends AppCompatActivity implements PlaybackListener {
         binding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && musicService != null) {
+                if (fromUser) {
                     binding.timeCurrent.setText(formatMs(progress));
                 }
             }
@@ -82,6 +88,47 @@ public class Song_player extends AppCompatActivity implements PlaybackListener {
                 musicService.playNext();
             }
         });
+    }
+
+    private void ensureMotionAnimators() {
+        if (albumFloatAnimator != null) {
+            return;
+        }
+        PathInterpolator ease = new PathInterpolator(0.45f, 0.05f, 0.25f, 1f);
+        albumFloatAnimator = ObjectAnimator.ofFloat(binding.albumArt, View.TRANSLATION_Y, 0f, -18f, 0f, 18f, 0f);
+        albumFloatAnimator.setDuration(2800);
+        albumFloatAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        albumFloatAnimator.setInterpolator(ease);
+
+        PathInterpolator ease2 = new PathInterpolator(0.35f, 0f, 0.2f, 1f);
+        panelFloatAnimator = ObjectAnimator.ofFloat(binding.glassPanel, View.TRANSLATION_Y, 0f, 8f, 0f, -8f, 0f);
+        panelFloatAnimator.setDuration(3200);
+        panelFloatAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        panelFloatAnimator.setInterpolator(ease2);
+    }
+
+    private void setPlayingMotion(boolean playing) {
+        ensureMotionAnimators();
+        if (playing) {
+            binding.albumArt.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            albumFloatAnimator.start();
+            panelFloatAnimator.start();
+        } else {
+            albumFloatAnimator.cancel();
+            panelFloatAnimator.cancel();
+            binding.albumArt.setTranslationY(0f);
+            binding.glassPanel.setTranslationY(0f);
+            binding.albumArt.setLayerType(View.LAYER_TYPE_NONE, null);
+        }
+    }
+
+    private void cancelMotionAnimators() {
+        if (albumFloatAnimator != null) {
+            albumFloatAnimator.cancel();
+        }
+        if (panelFloatAnimator != null) {
+            panelFloatAnimator.cancel();
+        }
     }
 
     private void togglePlayPause() {
@@ -143,6 +190,18 @@ public class Song_player extends AppCompatActivity implements PlaybackListener {
     }
 
     @Override
+    protected void onDestroy() {
+        cancelMotionAnimators();
+        super.onDestroy();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.fade_hold, R.anim.slide_out_down);
+    }
+
+    @Override
     public void onTrackChanged(Track track) {
         if (track == null) {
             return;
@@ -156,6 +215,7 @@ public class Song_player extends AppCompatActivity implements PlaybackListener {
         binding.btnPlayPause.setContentDescription(
                 getString(playing ? R.string.action_pause : R.string.action_play)
         );
+        setPlayingMotion(playing);
     }
 
     @Override
@@ -174,7 +234,6 @@ public class Song_player extends AppCompatActivity implements PlaybackListener {
 
     @Override
     public void onPlaybackEnded() {
-        // Queue may auto-advance; UI updates arrive via onTrackChanged / onIsPlayingChanged.
     }
 
     private static String formatMs(long ms) {

@@ -60,6 +60,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private final List<Track> queue = new ArrayList<>();
     private int queueIndex = 0;
     private boolean prepared = false;
+    private boolean released;
 
     public class LocalBinder extends Binder {
         MusicService getService() {
@@ -120,7 +121,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
             handleAction(intent.getAction(), intent);
         }
 
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     private void handleAction(String action, Intent intent) {
@@ -207,9 +208,19 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     private void stopAndRelease() {
+        synchronized (this) {
+            if (released) {
+                return;
+            }
+            released = true;
+        }
         mainHandler.removeCallbacks(progressTicker);
         releasePlayer();
-        stopForeground(STOP_FOREGROUND_REMOVE);
+        queue.clear();
+        try {
+            stopForeground(STOP_FOREGROUND_REMOVE);
+        } catch (Exception ignored) {
+        }
         if (mediaSession != null) {
             mediaSession.setActive(false);
             mediaSession.release();
@@ -220,12 +231,17 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
     @Override
     public void onDestroy() {
-        mainHandler.removeCallbacks(progressTicker);
-        releasePlayer();
-        if (mediaSession != null) {
-            mediaSession.setActive(false);
-            mediaSession.release();
-            mediaSession = null;
+        synchronized (this) {
+            if (!released) {
+                released = true;
+                mainHandler.removeCallbacks(progressTicker);
+                releasePlayer();
+                if (mediaSession != null) {
+                    mediaSession.setActive(false);
+                    mediaSession.release();
+                    mediaSession = null;
+                }
+            }
         }
         super.onDestroy();
     }
@@ -458,6 +474,12 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         if (nm != null) {
             nm.notify(NOTIFICATION_ID, buildNotification(track, playing));
         }
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        stopAndRelease();
+        super.onTaskRemoved(rootIntent);
     }
 
     @Nullable

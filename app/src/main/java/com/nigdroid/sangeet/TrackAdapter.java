@@ -15,7 +15,7 @@ import java.util.Locale;
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHolder> {
 
     public interface OnTrackClickListener {
-        void onTrackClick(int position);
+        void onTrackClick(Track track);
     }
 
     private final List<Track> tracks;
@@ -39,7 +39,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
 
     @Override
     public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
-        holder.bind(tracks.get(position), position);
+        holder.bind(tracks.get(position));
     }
 
     @Override
@@ -66,10 +66,12 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
             this.binding = binding;
         }
 
-        void bind(Track track, int position) {
+        void bind(Track track) {
             binding.title.setText(track.getTitle());
             String artist = track.getArtist();
-            binding.subtitle.setText(artist.isEmpty() ? binding.getRoot().getContext().getString(R.string.unknown_artist) : artist);
+            binding.subtitle.setText(artist.isEmpty()
+                    ? binding.getRoot().getContext().getString(R.string.unknown_artist)
+                    : artist);
             binding.duration.setText(formatDuration(track.getDurationMs()));
             Uri art = MusicLibrary.albumArtUri(track.getAlbumId());
             if (art != null) {
@@ -77,7 +79,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
             } else {
                 binding.cover.setImageResource(R.drawable.baseline_music_note_24);
             }
-            binding.getRoot().setOnClickListener(v -> listener.onTrackClick(position));
+            binding.getRoot().setOnClickListener(v -> listener.onTrackClick(track));
         }
     }
 }
